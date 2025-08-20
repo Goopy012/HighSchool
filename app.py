@@ -1,8 +1,3 @@
-# app.py — 초간단 웹 UI 요약기 (Streamlit 1개만 설치)
-# - URL에서 HTML 내려받기(표준 라이브러리)
-# - 위키 친화형 <p> 본문만 추출(HTMLParser)
-# - 키워드(빈도) + 3문장 요약
-# - 표/개별 카드 + 키워드 빈도 막대그래프 + CSV 다운로드
 
 import re, io, csv
 from collections import Counter
@@ -11,10 +6,10 @@ from urllib.request import Request, urlopen
 
 import streamlit as st
 
-# -------------------- 설정(원하면 수정) --------------------
+# -------------------- 설정 --------------------
 DEFAULT_MAX_SENTENCES = 3
 DEFAULT_TOPK = 5
-MAX_SENT_CHARS = 300  # 0이면 문장 자르기 비활성화
+MAX_SENT_CHARS = 300  
 STOPWORDS = set("""
 그리고 그러나 그래서 또는 또한 및 등 이 그 저 것 수 등등 에 의 은 는 이 가 을 를 으로 로 에서 부터 까지 도 만 보다 보다도
 the a an and or but if then else also to of in on at for from with by as is are was were be been being this that these those
@@ -241,3 +236,4 @@ if run:
         w = csv.DictWriter(buf, fieldnames=["url", "title", "keywords", "summary"])
         w.writeheader(); w.writerows(table_rows)
         st.download_button("CSV 다운로드", data=buf.getvalue().encode("utf-8-sig"), file_name="results.csv", mime="text/csv")
+
