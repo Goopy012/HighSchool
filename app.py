@@ -11,7 +11,8 @@ DEFAULT_MAX_SENTENCES = 3
 DEFAULT_TOPK = 5
 MAX_SENT_CHARS = 300  
 STOPWORDS = set("""
-그리고 그러나 그래서 또는 또한 및 등 이 그 저 것 수 등등 에 의 은 는 이 가 을 를 으로 로 에서 부터 까지 도 만 보다 보다도
+그리고 그러나 그래서 또는 또한 및 등 이 그 저 것 수 등등 에 의 은 는 이 가 을 를 으로 로 에서 부터 까지 도 만 보다 보다도 있다 이다 하다 되다 합니다 합니다만 합니다만은 합니다만도 입니다 입니다만 입니다만은 입니다만도
+됐다 된다 됩니다 했다 한다 하였다 이었다 였다
 the a an and or but if then else also to of in on at for from with by as is are was were be been being this that these those
 """.split())
 # -----------------------------------------------------------
@@ -140,8 +141,36 @@ def split_sentences(text: str):
     return [p.strip() for p in parts if len(p.strip()) > 2]
 
 def tokenize(text: str):
-    """영문/한글 2글자 이상 토큰만 추출."""
-    return [t.lower() for t in re.findall(r"[A-Za-z가-힣]{2,}", text or "")]
+    import re
+    raw = [t.lower() for t in re.findall(r"[A-Za-z가-힣]{2,}", text or "")]
+
+    # 자주 보이는 종결/정중/보조 용언 접미어 목록 (안전한 것만 소수 채택)
+    SUFFIXES = (
+        "입니다", "였다", "이었다", "한다", "했다", "된다", "됩니다",
+        "이었다고", "했다고", "한다고", "된다고",
+        "이라면", "이라서", "이지만",
+        "있습니다", "있었다", "있었다고",
+    )
+
+    VERB_LIKE = {"있다", "이다", "하다", "되다"}  # 의미 약한 용언 원형은 버림
+
+    normed = []
+    for t in raw:
+        original = t
+        # 접미어 하나만 잘라냄(너무 공격적이면 오류 증가하니 1회만)
+        for suf in SUFFIXES:
+            if t.endswith(suf) and len(t) > len(suf) + 1:
+                t = t[: -len(suf)]
+                break
+        # 원형 자체가 의미 약하면 버림
+        if t in VERB_LIKE:
+            continue
+        # 한 글자/두 글자 너무 짧아지면 버림(노이즈 방지)
+        if len(t) < 2:
+            continue
+        normed.append(t)
+    return normed
+
 
 def keyword_topk(text: str, k: int = DEFAULT_TOPK):
     """불용어 제외 후 빈도 상위 k개 단어."""
@@ -236,4 +265,5 @@ if run:
         w = csv.DictWriter(buf, fieldnames=["url", "title", "keywords", "summary"])
         w.writeheader(); w.writerows(table_rows)
         st.download_button("CSV 다운로드", data=buf.getvalue().encode("utf-8-sig"), file_name="results.csv", mime="text/csv")
+
 
