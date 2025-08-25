@@ -212,7 +212,7 @@ def process_one(url, max_sentences=DEFAULT_MAX_SENTENCES, topk=DEFAULT_TOPK):
 
 # ======================= Streamlit UI =======================
 st.set_page_config(page_title="초간단 요약기", page_icon="📝", layout="centered")
-st.title("📝 초간단 URL 요약기 (한 파일)")
+st.title("📝 과제 도우미(요약기)")
 
 st.caption("URL을 줄마다 입력 → 실행을 누르면, 문서별 **키워드/3문장 요약**과 **키워드 빈도 그래프**가 보여요.")
 
@@ -265,5 +265,6 @@ if run:
         w = csv.DictWriter(buf, fieldnames=["url", "title", "keywords", "summary"])
         w.writeheader(); w.writerows(table_rows)
         st.download_button("CSV 다운로드", data=buf.getvalue().encode("utf-8-sig"), file_name="results.csv", mime="text/csv")
+
 
 
